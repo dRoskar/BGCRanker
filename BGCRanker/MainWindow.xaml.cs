@@ -24,14 +24,16 @@ namespace BGCRanker
     {
 
         private String dataPath;
-        private List<String> games;
-        private List<Dictionary<String, String>> players;
+        private List<Game> games;
+        private List<String> gameNames;
+        private List<Player> players;
         private String selectedGame;
 
         public MainWindow()
         {
-            games = new List<String>();
-            players = new List<Dictionary<String, String>>();
+            games = new List<Game>();
+            players = new List<Player>();
+            gameNames = new List<String>();
 
             InitializeComponent();
 
@@ -119,35 +121,38 @@ namespace BGCRanker
             foreach (String gameDirectory in gameDirectories)
             {
                 String[] splitDir = gameDirectory.Split('\\');
-                games.Add(splitDir.ElementAt(splitDir.Length - 1));
+                Game game = new Game(splitDir.ElementAt(splitDir.Length - 1));
+                games.Add(game);
+                gameNames.Add(game.Name);
             }
 
             // get players
-            foreach(String game in games){
+            foreach(Game game in games){
                 // make player profiles folder
-                String profilesPath = dataPath + "\\" + game + @"\profiles";
+                String profilesPath = dataPath + "\\" + game.Name + @"\profiles";
                 if (!Directory.Exists(profilesPath))
                 {
                     Directory.CreateDirectory(profilesPath);
                 }
 
                 // read player list from game folder
-                if (File.Exists(dataPath + "\\" + game + @"\players.txt"))
+                if (File.Exists(dataPath + "\\" + game.Name + @"\players.txt"))
                 {
-                    String[] lines = System.IO.File.ReadAllLines(dataPath + "\\" + game + @"\players.txt", Encoding.UTF8);
+                    String[] lines = System.IO.File.ReadAllLines(dataPath + "\\" + game.Name + @"\players.txt", Encoding.UTF8);
 
                     foreach (String line in lines)
                     {
-                        Dictionary<String, String> player = new Dictionary<String, String>();
-                        player.Add("game", game);
-                        player.Add("name", line);
+                        Player player = new Player(line, game.Name);
                         players.Add(player);
 
                         // if player doesn't exist in the database yet, give him a profile
-                        if (!File.Exists(profilesPath + "\\" + player["name"]))
+                        if (!File.Exists(profilesPath + "\\" + player.Name + ".txt"))
                         {
-                            StreamWriter profileWriter = File.CreateText(profilesPath + "\\" + player["name"] + ".txt");
+                            StreamWriter profileWriter = File.CreateText(profilesPath + "\\" + player.Name + ".txt");
+                            profileWriter.WriteLine("name=" + player.Name);
                             profileWriter.WriteLine("victories=0");
+                            profileWriter.WriteLine("level=1");
+                            profileWriter.WriteLine("rank=");
                             profileWriter.Close();
                         }
                     }
@@ -172,7 +177,7 @@ namespace BGCRanker
         private void gamesComboBox_Loaded(object sender, RoutedEventArgs e)
         {
             // bind games list to combo box and select first item
-            gamesComboBox.ItemsSource = games;
+            gamesComboBox.ItemsSource = gameNames;
             gamesComboBox.SelectedIndex = 0;
         }
 
@@ -190,11 +195,11 @@ namespace BGCRanker
             playersListBox.ItemsSource = playersCurrent;
 
 
-            foreach (Dictionary<String, String> player in players)
+            foreach (Player player in players)
             {
-                if (player["game"].Equals(selectedGame))
+                if (player.Game.Equals(selectedGame))
                 {
-                    playersCurrent.Add(player["name"]);
+                    playersCurrent.Add(player.Name);
                 }
             }
 

@@ -67,6 +67,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Game.cs" />
     <Compile Include="gamePrompt.xaml.cs">
       <DependentUpon>gamePrompt.xaml</DependentUpon>
     </Compile>
@@ -80,6 +81,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Player.cs" />
     <Compile Include="PlayerPrompt.xaml.cs">
       <DependentUpon>PlayerPrompt.xaml</DependentUpon>
     </Compile>
