@@ -9,9 +9,10 @@
         <Button x:Name="pathBtn" Content="Change data path" Margin="433,10,10,0" VerticalAlignment="Top" Click="pathBtn_Click"/>
         <DataGrid Margin="10,37,10,10"/>
         <ListBox x:Name="playersListBox" HorizontalAlignment="Left" Margin="10,50,0,0" Width="126" SelectionChanged="playersListBox_SelectionChanged" Height="220" VerticalAlignment="Top"/>
-        <Label x:Name="playerNameLabel" Content="" HorizontalAlignment="Left" Margin="141,50,0,0" VerticalAlignment="Top" Width="216" FontSize="16" FontWeight="Bold"/>
+        <Label x:Name="playerNameLabel" Content="" Margin="141,50,10,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold"/>
         <Button x:Name="addGameBtn" Content="+" HorizontalAlignment="Left" Margin="220,10,0,0" VerticalAlignment="Top" Width="22" Click="addGameBtn_Click"/>
         <Button x:Name="addPlayerBtn" Content="Add Player" Margin="10,270,0,0" Height="22" VerticalAlignment="Top" HorizontalAlignment="Left" Width="126" Click="addPlayerBtn_Click"/>
+        <Button x:Name="addLadderBtn" Content="Add ranking ladder" Margin="247,10,187,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

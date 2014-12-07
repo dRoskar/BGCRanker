@@ -205,7 +205,17 @@ namespace BGCRanker
         {
             if (playersListBox.SelectedItem != null)
             {
-                playerNameLabel.Content = playersListBox.SelectedItem.ToString();
+                //display data if the game has a ranking ladder
+                if (File.Exists(dataPath + "\\" + selectedGame + "\\" + "rankingLadder.txt"))
+                {
+                    playerNameLabel.FontSize = 16;
+                    playerNameLabel.Content = playersListBox.SelectedItem.ToString();
+                }
+                else
+                {
+                    playerNameLabel.FontSize = 12;
+                    playerNameLabel.Content = "This game does not have a ranking ladder yet.";
+                }
             }
             else{
                 clearFields();
