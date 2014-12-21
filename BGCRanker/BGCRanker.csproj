@@ -59,6 +59,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="LadderEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -70,6 +74,9 @@
     <Compile Include="Game.cs" />
     <Compile Include="gamePrompt.xaml.cs">
       <DependentUpon>gamePrompt.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LadderEditor.xaml.cs">
+      <DependentUpon>LadderEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

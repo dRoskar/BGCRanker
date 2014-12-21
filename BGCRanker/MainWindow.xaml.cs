@@ -338,7 +338,8 @@ namespace BGCRanker
 
             // open ladder editing window
             StreamReader ladderReader = File.OpenText(dataPath + "\\" + selectedGame.Name + "\\" + "rankingLadder.txt");
-            
+            LadderEditor ladderEditor = new LadderEditor(ladderReader);
+            ladderEditor.ShowDialog();
 
             ladderReader.Close();
         }
