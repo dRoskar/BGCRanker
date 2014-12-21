@@ -12,7 +12,7 @@
         <Label x:Name="playerNameLabel" Content="" Margin="141,50,10,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold"/>
         <Button x:Name="addGameBtn" Content="+" HorizontalAlignment="Left" Margin="220,10,0,0" VerticalAlignment="Top" Width="22" Click="addGameBtn_Click"/>
         <Button x:Name="addPlayerBtn" Content="Add Player" Margin="10,270,0,0" Height="22" VerticalAlignment="Top" HorizontalAlignment="Left" Width="126" Click="addPlayerBtn_Click"/>
-        <Button x:Name="addLadderBtn" Content="Add ranking ladder" Margin="247,10,187,0" VerticalAlignment="Top"/>
+        <Button x:Name="addLadderBtn" Content="Add ranking ladder" Margin="247,10,187,0" VerticalAlignment="Top" Click="addLadderBtn_Click"/>
 
     </Grid>
 </Window>

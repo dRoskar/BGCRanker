@@ -27,7 +27,7 @@ namespace BGCRanker
         private List<Game> games;
         private List<String> gameNames;
         private List<Player> players;
-        private String selectedGame;
+        private Game selectedGame;
 
         public MainWindow()
         {
@@ -159,6 +159,19 @@ namespace BGCRanker
                 }
             }
 
+            // check for ranking ladders
+            foreach (Game game in games)
+            {
+                if (File.Exists(dataPath + "\\" + game.Name + "\\" + "rankingLadder.txt"))
+                {
+                    game.HasRankingLadder = true;
+                }
+                else
+                {
+                    game.HasRankingLadder = false;
+                }
+            }
+
             gamesComboBox.Items.Refresh();
 
             // if new game was just added, switch to it
@@ -188,7 +201,14 @@ namespace BGCRanker
 
         public void comboSelectionChanged()
         {
-            selectedGame = gamesComboBox.SelectedItem as String;
+            // find selected game in game list
+            foreach (Game game in games)
+            {
+                if (game.Name == gamesComboBox.SelectedItem)
+                {
+                    selectedGame = game;
+                }
+            }
 
             // populate players list box
             List<String> playersCurrent = new List<String>();
@@ -197,7 +217,7 @@ namespace BGCRanker
 
             foreach (Player player in players)
             {
-                if (player.Game.Equals(selectedGame))
+                if (player.Game.Equals(selectedGame.Name))
                 {
                     playersCurrent.Add(player.Name);
                 }
@@ -211,15 +231,17 @@ namespace BGCRanker
             if (playersListBox.SelectedItem != null)
             {
                 //display data if the game has a ranking ladder
-                if (File.Exists(dataPath + "\\" + selectedGame + "\\" + "rankingLadder.txt"))
+                if (selectedGame.HasRankingLadder)
                 {
                     playerNameLabel.FontSize = 16;
                     playerNameLabel.Content = playersListBox.SelectedItem.ToString();
+                    addLadderBtn.Content = "Edit ranking ladder";
                 }
                 else
                 {
                     playerNameLabel.FontSize = 12;
                     playerNameLabel.Content = "This game does not have a ranking ladder yet.";
+                    addLadderBtn.Content = "Add ranking ladder";
                 }
             }
             else{
@@ -274,13 +296,13 @@ namespace BGCRanker
                     try
                     {
                         // if file is empty, no new line
-                        if (System.IO.File.ReadAllText(dataPath + "\\" + selectedGame + "\\players.txt") != "")
+                        if (System.IO.File.ReadAllText(dataPath + "\\" + selectedGame.Name + "\\players.txt") != "")
                         {
-                            System.IO.File.AppendAllText(dataPath + "\\" + selectedGame + "\\players.txt", string.Format("{0}{1}", Environment.NewLine, playerName), Encoding.UTF8);
+                            System.IO.File.AppendAllText(dataPath + "\\" + selectedGame.Name + "\\players.txt", string.Format("{0}{1}", Environment.NewLine, playerName), Encoding.UTF8);
                         }
                         else
                         {
-                            System.IO.File.AppendAllText(dataPath + "\\" + selectedGame + "\\players.txt", playerName, Encoding.UTF8);
+                            System.IO.File.AppendAllText(dataPath + "\\" + selectedGame.Name + "\\players.txt", playerName, Encoding.UTF8);
                         }
                     }
                     catch (UnauthorizedAccessException uae)
@@ -295,6 +317,30 @@ namespace BGCRanker
                     comboSelectionChanged();
                 }
             }
+        }
+
+        private void addLadderBtn_Click(object sender, RoutedEventArgs e)
+        {
+            
+
+            // no ladder yet?
+            if (!selectedGame.HasRankingLadder)
+            {
+                // create one
+                StreamWriter ladderWriter = System.IO.File.CreateText(dataPath + "\\" + selectedGame.Name + "\\" + "rankingLadder.txt");
+                ladderWriter.WriteLine("isCustom=0");
+                ladderWriter.WriteLine("formulaStep=0.15");
+                ladderWriter.WriteLine("levels=20");
+                ladderWriter.Close();
+                selectedGame.HasRankingLadder = true;
+                addLadderBtn.Content = "Edit ranking ladder";
+            }
+
+            // open ladder editing window
+            StreamReader ladderReader = File.OpenText(dataPath + "\\" + selectedGame.Name + "\\" + "rankingLadder.txt");
+            
+
+            ladderReader.Close();
         }
     }
 }
