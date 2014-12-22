@@ -204,10 +204,21 @@ namespace BGCRanker
             // find selected game in game list
             foreach (Game game in games)
             {
-                if (game.Name == gamesComboBox.SelectedItem)
+                if (game.Name == (String) gamesComboBox.SelectedItem)
                 {
                     selectedGame = game;
                 }
+            }
+
+            if (selectedGame.HasRankingLadder)
+            {
+                addLadderBtn.Content = "Edit ranking ladder";
+                addLadderBtn.FontWeight = FontWeights.Normal;
+            }
+            else
+            {
+                addLadderBtn.Content = "Add ranking ladder";
+                addLadderBtn.FontWeight = FontWeights.Bold;
             }
 
             // populate players list box
@@ -235,13 +246,11 @@ namespace BGCRanker
                 {
                     playerNameLabel.FontSize = 16;
                     playerNameLabel.Content = playersListBox.SelectedItem.ToString();
-                    addLadderBtn.Content = "Edit ranking ladder";
                 }
                 else
                 {
                     playerNameLabel.FontSize = 12;
                     playerNameLabel.Content = "This game does not have a ranking ladder yet.";
-                    addLadderBtn.Content = "Add ranking ladder";
                 }
             }
             else{
@@ -321,19 +330,18 @@ namespace BGCRanker
 
         private void addLadderBtn_Click(object sender, RoutedEventArgs e)
         {
-            
-
             // no ladder yet?
             if (!selectedGame.HasRankingLadder)
             {
                 // create one
                 StreamWriter ladderWriter = System.IO.File.CreateText(dataPath + "\\" + selectedGame.Name + "\\" + "rankingLadder.txt");
                 ladderWriter.WriteLine("isCustom=0");
-                ladderWriter.WriteLine("formulaStep=0.15");
+                ladderWriter.WriteLine("formula=0.15");
                 ladderWriter.WriteLine("levels=20");
                 ladderWriter.Close();
                 selectedGame.HasRankingLadder = true;
                 addLadderBtn.Content = "Edit ranking ladder";
+                addLadderBtn.FontWeight = FontWeights.Normal;
             }
 
             // open ladder editing window
