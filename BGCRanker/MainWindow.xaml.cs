@@ -338,6 +338,7 @@ namespace BGCRanker
                 ladderWriter.WriteLine("isCustom=0");
                 ladderWriter.WriteLine("formula=0.15");
                 ladderWriter.WriteLine("levels=20");
+                ladderWriter.WriteLine("hasData=0");
                 ladderWriter.Close();
                 selectedGame.HasRankingLadder = true;
                 addLadderBtn.Content = "Edit ranking ladder";

@@ -26,27 +26,21 @@ namespace BGCRanker
         private int levels;
         private float formula;
         private bool isCustom;
+        private bool hasData;
 
         public LadderEditor(StreamReader ladderReader)
         {
-            InitializeComponent();
             reader = ladderReader;
+            InitializeComponent();
+        }
 
+        private void DataGrid_Loaded(object sender, RoutedEventArgs e)
+        {
             // get main properties
             getProperties();
-            
+
             // display main properties
             showProperties();
-        }
-
-        private void saveBtn_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
-
-        private void cancleBtn_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
         }
 
         private void getProperties(){
@@ -65,6 +59,10 @@ namespace BGCRanker
                 {
                     int.TryParse(line.Substring(line.IndexOf("=") + 1), out levels);
                 }
+                else if (line.Contains("hasData="))
+                {
+                    hasData = line.Substring(line.IndexOf("=") + 1) == "1" ? true : false;
+                }
             }
         }
 
@@ -75,9 +73,14 @@ namespace BGCRanker
             isCustomCheckBox.IsChecked = isCustom;
         }
 
-        private void DataGrid_Loaded(object sender, RoutedEventArgs e)
+        private void saveBtn_Click(object sender, RoutedEventArgs e)
         {
-            
+            this.Close();
+        }
+
+        private void cancleBtn_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }
