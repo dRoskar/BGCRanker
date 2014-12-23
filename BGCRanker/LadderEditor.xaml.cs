@@ -28,6 +28,7 @@ namespace BGCRanker
         private float formula;
         private bool isCustom;
         private bool hasData;
+        private List<float> requirements;
 
         public LadderEditor(String ladderPath)
         {
@@ -39,6 +40,9 @@ namespace BGCRanker
         {
             // get main properties
             getProperties();
+
+            // calculate level requirements
+            calculateRequirements();
 
             // display main properties
             showProperties();
@@ -95,11 +99,29 @@ namespace BGCRanker
 
             for (int i = 0; i < levels; i++)
             {
-                writer.WriteLine("LVL" + (i + 1) + "=");
+                writer.WriteLine("LVL" + (i + 1) + "(" + getRequirement(i + 1) + ")[]");
             }
             writer.Close();
             hasData = true;
             writeHasData(true);
+        }
+
+        private int getRequirement(int level)
+        {
+            return (int) Math.Round(requirements[level - 1], 0);
+        }
+
+        private void calculateRequirements()
+        {
+            requirements = new List<float>();
+            requirements.Add(0.0f);
+            requirements.Add(1.0f);
+            float requirement = requirements[1];
+            for (int i = 0; i < levels - 2; i++)
+            {
+                requirement += requirement * formula;
+                requirements.Add(requirement);
+            }
         }
 
         private void readGridData()
