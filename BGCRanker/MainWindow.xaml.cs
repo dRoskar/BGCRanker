@@ -330,11 +330,12 @@ namespace BGCRanker
 
         private void addLadderBtn_Click(object sender, RoutedEventArgs e)
         {
+            String ladderPath = dataPath + "\\" + selectedGame.Name + "\\" + "rankingLadder.txt";
+
             // no ladder yet?
             if (!selectedGame.HasRankingLadder)
             {
-                // create one
-                StreamWriter ladderWriter = System.IO.File.CreateText(dataPath + "\\" + selectedGame.Name + "\\" + "rankingLadder.txt");
+                StreamWriter ladderWriter = System.IO.File.CreateText(ladderPath);
                 ladderWriter.WriteLine("isCustom=0");
                 ladderWriter.WriteLine("formula=0.15");
                 ladderWriter.WriteLine("levels=20");
@@ -346,11 +347,8 @@ namespace BGCRanker
             }
 
             // open ladder editing window
-            StreamReader ladderReader = File.OpenText(dataPath + "\\" + selectedGame.Name + "\\" + "rankingLadder.txt");
-            LadderEditor ladderEditor = new LadderEditor(ladderReader);
+            LadderEditor ladderEditor = new LadderEditor(ladderPath);
             ladderEditor.ShowDialog();
-
-            ladderReader.Close();
         }
     }
 }
