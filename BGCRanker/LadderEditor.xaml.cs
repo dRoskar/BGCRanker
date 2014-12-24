@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,15 +30,20 @@ namespace BGCRanker
         private bool isCustom;
         private bool hasData;
         private List<float> requirements;
+        private ObservableCollection<Level> ladder;
 
         public LadderEditor(String ladderPath)
         {
             path = ladderPath;
+            ladder = new ObservableCollection<Level>();
             InitializeComponent();
         }
 
         private void DataGrid_Loaded(object sender, RoutedEventArgs e)
         {
+            // bind data
+            ranksGrid.ItemsSource = ladder;
+
             // get main properties
             getProperties();
 
@@ -48,20 +54,18 @@ namespace BGCRanker
             showProperties();
 
             // populate grid
-            if (hasData)
-            {
-                // read the data from text file
-                readGridData();
-            }
-            else
+            if (!hasData)
             {
                 // generate data from properties and write to text file
                 generateGridData();
             }
+
+            // read the data from text file
+            readGridData();
         }
 
         private void getProperties(){
-            // read data from file
+            // read basic properties from file
             StreamReader reader = new StreamReader(path, Encoding.UTF8);
             String line;
             while ((line = reader.ReadLine()) != null)
@@ -94,7 +98,7 @@ namespace BGCRanker
         }
 
         private void generateGridData(){
-            // write data to file
+            // write levels data to file
             StreamWriter writer = new StreamWriter(path, true, Encoding.UTF8);  // appending
 
             for (int i = 0; i < levels; i++)
@@ -104,6 +108,35 @@ namespace BGCRanker
             writer.Close();
             hasData = true;
             writeHasData(true);
+        }
+
+        private void readGridData()
+        {
+            StreamReader sr = new StreamReader(path, Encoding.UTF8);
+            String line;
+            int number;
+            int requirement;
+            String rankName;
+
+            while ((line = sr.ReadLine()) != null)
+            {
+                // parse data
+                if(Regex.IsMatch(line, "LVL[0-9]+\\([0-9]+\\)\\[[a-zA-z]*\\]")){
+                    Match match = Regex.Match(line, "LVL([0-9]+)\\(([0-9]+)\\)\\[([a-zA-z]*)\\]");
+
+                    // level number
+                    int.TryParse(match.Groups[1].Value, out number);
+
+                    // requirement
+                    int.TryParse(match.Groups[2].Value, out requirement);
+
+                    // rankName
+                    rankName = match.Groups[3].Value;
+
+                    // add to grid
+                    ladder.Add(new Level(number, requirement, rankName));
+                }
+            }
         }
 
         private int getRequirement(int level)
@@ -124,11 +157,6 @@ namespace BGCRanker
             }
         }
 
-        private void readGridData()
-        {
-
-        }
-
         private void writeIsCustom(Boolean value)
         {
             String sValue = value == true ? "1" : "0";
@@ -138,13 +166,13 @@ namespace BGCRanker
         private void writeLevels(int value)
         {
             String sValue = value.ToString();
-            File.WriteAllText(path, Regex.Replace(File.ReadAllText(path, Encoding.UTF8), "levels=[0123456789]", "levels=" + sValue));
+            File.WriteAllText(path, Regex.Replace(File.ReadAllText(path, Encoding.UTF8), "levels=[0-9]+", "levels=" + sValue));
         }
 
         private void writeFormula(float value)
         {
             String sValue = value.ToString();
-            File.WriteAllText(path, Regex.Replace(File.ReadAllText(path, Encoding.UTF8), "formula=[0123456789.]", "formula=" + sValue));
+            File.WriteAllText(path, Regex.Replace(File.ReadAllText(path, Encoding.UTF8), "formula=[0-9.]+", "formula=" + sValue));
         }
 
         private void writeHasData(Boolean value)
@@ -161,6 +189,20 @@ namespace BGCRanker
         private void cancleBtn_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+    }
+
+    public class Level
+    {
+        public int Number { get; set; }
+        public int Requirement { get; set; }
+        public String RankName { get; set; }
+
+        public Level(int number, int requirement, String rankName)
+        {
+            this.Number = number;
+            this.Requirement = requirement;
+            this.RankName = rankName;
         }
     }
 }
