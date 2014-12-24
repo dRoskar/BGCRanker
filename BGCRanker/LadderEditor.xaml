@@ -3,16 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="LadderEditor" Height="491" Width="484" ResizeMode="NoResize">
     <Grid>
-        <Button x:Name="cancleBtn" Content="Cancle" Margin="0,0,10,10" Click="cancleBtn_Click" HorizontalAlignment="Right" Width="75" Height="22" VerticalAlignment="Bottom"/>
+        <Button x:Name="cancelBtn" Content="Cancel" Margin="0,0,10,10" Click="cancelBtn_Click" HorizontalAlignment="Right" Width="75" Height="22" VerticalAlignment="Bottom"/>
         <Button x:Name="saveBtn" Content="Save" Margin="0,0,90,10" Click="saveBtn_Click" Height="22" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75"/>
         <DataGrid x:Name="ranksGrid" Margin="10,0,10,37" Height="350" VerticalAlignment="Bottom" Loaded="DataGrid_Loaded"/>
-        <Button x:Name="refreshBtn" Content="Refresh" HorizontalAlignment="Right" Margin="0,0,170,10" Width="75" Height="22" VerticalAlignment="Bottom"/>
+        <Button x:Name="refreshBtn" Content="Refresh" HorizontalAlignment="Right" Margin="0,0,170,10" Width="75" Height="22" VerticalAlignment="Bottom" Click="refreshBtn_Click"/>
         <Label Content="Number of levels:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="103"/>
-        <TextBox x:Name="levelsTextBox" HorizontalAlignment="Left" Height="23" Margin="118,13,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="60"/>
+        <TextBox x:Name="levelsTextBox" HorizontalAlignment="Left" Height="23" Margin="118,13,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="60" KeyDown="levelsTextBox_KeyDown"/>
         <Label Content="Formula:" HorizontalAlignment="Left" Margin="199,10,0,0" VerticalAlignment="Top" Width="55"/>
-        <TextBox x:Name="formulaTextBox" HorizontalAlignment="Left" Height="23" Margin="259,13,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="60"/>
+        <TextBox x:Name="formulaTextBox" HorizontalAlignment="Left" Height="23" Margin="259,13,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="60" KeyDown="formulaTextBox_KeyDown"/>
         <Label Content="Is custom:" HorizontalAlignment="Left" Margin="347,10,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="isCustomCheckBox" Content="" HorizontalAlignment="Left" Margin="415,16,0,0" VerticalAlignment="Top" IsHitTestVisible="False" Focusable="False"/>
+        <CheckBox x:Name="isCustomCheckBox" Content="" HorizontalAlignment="Left" Margin="415,16,0,0" VerticalAlignment="Top" IsHitTestVisible="True" Checked="isCustomCheckBox_Checked" Unchecked="isCustomCheckBox_Unchecked"/>
 
     </Grid>
 </Window>
