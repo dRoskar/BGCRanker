@@ -53,8 +53,11 @@ namespace BGCRanker
             // populate grid
             if (!hasData)
             {
-                // generate data from properties and write to text file
-                generateGridData();
+                // generate data from default properties
+                generateExampleGridData();
+
+                //write grid data to file
+                writeGridDataToFile();
             }
 
             // read the data from text file
@@ -95,13 +98,23 @@ namespace BGCRanker
             formulaTextBox.IsEnabled = !isCustom;
         }
 
-        private void generateGridData(){
-            // write levels data to file
+        private void generateExampleGridData(){
+            // generate example gird data
+            ladder.Clear();
+
+            for (int i = 0; i < levels; i++)
+            {
+                ladder.Add(new Level(i + 1, getRequirement(i + 1), ""));
+            }
+        }
+
+        private void writeGridDataToFile()
+        {
             StreamWriter writer = new StreamWriter(path, true, Encoding.UTF8);  // appending
 
             for (int i = 0; i < levels; i++)
             {
-                writer.WriteLine("LVL" + (i + 1) + "(" + getRequirement(i + 1) + ")[]");
+                writer.WriteLine("LVL" + (i + 1) + "(" + getRequirement(i + 1) + ")[" + ladder[i].RankName + "]");
             }
             writer.Close();
             hasData = true;
@@ -115,6 +128,9 @@ namespace BGCRanker
             int number;
             int requirement;
             String rankName;
+
+            // clean up old data
+            ladder.Clear();
 
             while ((line = sr.ReadLine()) != null)
             {
@@ -165,7 +181,7 @@ namespace BGCRanker
 
         private void writeFormula(float value)
         {
-            String sValue = value.ToString();
+            String sValue = value.ToString(CultureInfo.InvariantCulture);
             File.WriteAllText(path, Regex.Replace(File.ReadAllText(path, Encoding.UTF8), "formula=[0-9.]+", "formula=" + sValue));
         }
 
@@ -177,7 +193,22 @@ namespace BGCRanker
 
         private void saveBtn_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            // refresh the grid
+            if (refreshGrid())
+            {
+                // write basic properties to file
+                writeIsCustom(isCustom);
+                writeFormula(formula);
+                writeLevels(levels);
+
+                // erase old level data from file
+                eraseLevelDataFromFile();
+
+                // write new level data to file
+                writeGridDataToFile();
+
+                this.Close();
+            }
         }
 
         private void cancelBtn_Click(object sender, RoutedEventArgs e)
@@ -206,7 +237,7 @@ namespace BGCRanker
             refreshGrid();
         }
 
-        private void refreshGrid()
+        private bool refreshGrid()
         {
             // validate fields
             int tempLevels;
@@ -217,7 +248,7 @@ namespace BGCRanker
             if (!int.TryParse(levelsTextBox.Text, out tempLevels))
             {
                 valid = false;
-                invalidField = "Levels text box";
+                invalidField = "levels text box";
             }
 
             if (!float.TryParse(formulaTextBox.Text, System.Globalization.NumberStyles.Any, NumberFormatInfo.InvariantInfo, out tempFormula))
@@ -262,30 +293,61 @@ namespace BGCRanker
                 if (!isCustom)
                 {
                     // edit grid data (requirements)
-                    if (tempFormula != formula)
+                    formula = tempFormula;
+                    foreach (Level lvl in ladder)
                     {
-                        formula = tempFormula;
-                        foreach (Level lvl in ladder)
-                        {
-                            lvl.Requirement = getRequirement(lvl.Number);
-                        }
+                        lvl.Requirement = getRequirement(lvl.Number);
                     }
                 }
 
                 ranksGrid.Items.Refresh();
+
+                return true;
             }
             else
             {
                 if (multipleInvalidFields)
                 {
                     MessageBox.Show("The values you provided in the " + invalidField + " are invalid");
+                    return false;
                 }
                 else
                 {
                     MessageBox.Show("The value you provided in the " + invalidField + " is invalid");
+                    return false;
                 }
 
             }
+        }
+
+        private void eraseLevelDataFromFile(){
+            StreamReader sr = new StreamReader(path, Encoding.UTF8);
+            String line;
+            List<String> lines = new List<String>();
+
+            // read all lines
+            while ((line = sr.ReadLine()) != null)
+            {
+                lines.Add(line);
+            }
+
+            // remove grid data lines
+            for (int i = lines.Count - 1; i > -1; i--)
+            {
+                if (lines[i].Contains("LVL"))
+                {
+                    lines.RemoveAt(i);
+                }
+            }
+            sr.Close();
+
+            // write remaining lines back to file
+            StreamWriter sw = new StreamWriter(path, false, Encoding.UTF8);
+            foreach (String ln in lines)
+            {
+                sw.WriteLine(ln);
+            }
+            sw.Close();
         }
 
         private void isCustomCheckBox_Checked(object sender, RoutedEventArgs e)
