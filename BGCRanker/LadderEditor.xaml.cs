@@ -43,6 +43,11 @@ namespace BGCRanker
             // setup grid
             ranksGrid.ItemsSource = ladder;
             ranksGrid.ColumnFromDisplayIndex(0).IsReadOnly = true;
+            ranksGrid.ColumnFromDisplayIndex(0).Width = 55;
+            ranksGrid.ColumnFromDisplayIndex(1).Width = 80;
+            ranksGrid.ColumnFromDisplayIndex(2).Width = 98;
+            ranksGrid.ColumnFromDisplayIndex(3).Width = 95;
+            ranksGrid.ColumnFromDisplayIndex(4).Width = 95;
 
             // get main properties
             getProperties();
@@ -104,7 +109,7 @@ namespace BGCRanker
 
             for (int i = 0; i < levels; i++)
             {
-                ladder.Add(new Level(i + 1, getRequirement(i + 1), ""));
+                ladder.Add(new Level(i + 1, getRequirement(i + 1), "", "", ""));
             }
         }
 
@@ -114,11 +119,42 @@ namespace BGCRanker
 
             for (int i = 0; i < levels; i++)
             {
-                writer.WriteLine("LVL" + (i + 1) + "(" + getRequirement(i + 1) + ")[" + ladder[i].RankName + "]");
+                writer.WriteLine("LVL" + (i + 1) + "(" + getRequirement(i + 1) + ")[" + ladder[i].RankName + "][" + ladder[i].ImageUri + "][" + ladder[i].ImageUrl + "]");
             }
             writer.Close();
             hasData = true;
             writeHasData(true);
+        }
+
+        private void eraseGridDataFromFile()
+        {
+            StreamReader sr = new StreamReader(path, Encoding.UTF8);
+            String line;
+            List<String> lines = new List<String>();
+
+            // read all lines
+            while ((line = sr.ReadLine()) != null)
+            {
+                lines.Add(line);
+            }
+
+            // remove grid data lines
+            for (int i = lines.Count - 1; i > -1; i--)
+            {
+                if (lines[i].Contains("LVL"))
+                {
+                    lines.RemoveAt(i);
+                }
+            }
+            sr.Close();
+
+            // write remaining lines back to file
+            StreamWriter sw = new StreamWriter(path, false, Encoding.UTF8);
+            foreach (String ln in lines)
+            {
+                sw.WriteLine(ln);
+            }
+            sw.Close();
         }
 
         private void readGridData()
@@ -128,6 +164,8 @@ namespace BGCRanker
             int number;
             int requirement;
             String rankName;
+            String imageUri;
+            String imageUrl;
 
             // clean up old data
             ladder.Clear();
@@ -135,8 +173,9 @@ namespace BGCRanker
             while ((line = sr.ReadLine()) != null)
             {
                 // parse data
-                if(Regex.IsMatch(line, "LVL[0-9]+\\([0-9]+\\)\\[[a-zA-z]*\\]")){
-                    Match match = Regex.Match(line, "LVL([0-9]+)\\(([0-9]+)\\)\\[([a-zA-z]*)\\]");
+                if (Regex.IsMatch(line, "LVL[0-9]+\\([0-9]+\\)\\[[a-zA-Z]*\\]\\[[a-zA-Z]*\\]\\[[a-zA-Z]*\\]"))
+                {
+                    Match match = Regex.Match(line, "LVL([0-9]+)\\(([0-9]+)\\)\\[([a-zA-Z]*)\\]\\[([a-zA-Z]*)\\]\\[([a-zA-Z]*)\\]");
 
                     // level number
                     int.TryParse(match.Groups[1].Value, out number);
@@ -144,11 +183,17 @@ namespace BGCRanker
                     // requirement
                     int.TryParse(match.Groups[2].Value, out requirement);
 
-                    // rankName
+                    // rank name
                     rankName = match.Groups[3].Value;
 
+                    // image URI
+                    imageUri = match.Groups[4].Value;
+
+                    // image URL
+                    imageUrl = match.Groups[5].Value;
+
                     // add to grid
-                    ladder.Add(new Level(number, requirement, rankName));
+                    ladder.Add(new Level(number, requirement, rankName, imageUri, imageUrl));
                 }
             }
         }
@@ -202,7 +247,7 @@ namespace BGCRanker
                 writeLevels(levels);
 
                 // erase old level data from file
-                eraseLevelDataFromFile();
+                eraseGridDataFromFile();
 
                 // write new level data to file
                 writeGridDataToFile();
@@ -285,7 +330,7 @@ namespace BGCRanker
                         levels = tempLevels;
                         for (int i = ladder.Count; i < levels; i++)
                         {
-                            ladder.Add(new Level(i + 1, getRequirement(i + 1), ""));
+                            ladder.Add(new Level(i + 1, getRequirement(i + 1), "", "", ""));
                         }
                     }
                 }
@@ -320,36 +365,6 @@ namespace BGCRanker
             }
         }
 
-        private void eraseLevelDataFromFile(){
-            StreamReader sr = new StreamReader(path, Encoding.UTF8);
-            String line;
-            List<String> lines = new List<String>();
-
-            // read all lines
-            while ((line = sr.ReadLine()) != null)
-            {
-                lines.Add(line);
-            }
-
-            // remove grid data lines
-            for (int i = lines.Count - 1; i > -1; i--)
-            {
-                if (lines[i].Contains("LVL"))
-                {
-                    lines.RemoveAt(i);
-                }
-            }
-            sr.Close();
-
-            // write remaining lines back to file
-            StreamWriter sw = new StreamWriter(path, false, Encoding.UTF8);
-            foreach (String ln in lines)
-            {
-                sw.WriteLine(ln);
-            }
-            sw.Close();
-        }
-
         private void isCustomCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             isCustom = true;
@@ -368,12 +383,16 @@ namespace BGCRanker
         public int Number { get; set; }
         public int Requirement { get; set; }
         public String RankName { get; set; }
+        public String ImageUri { get; set; }
+        public String ImageUrl { get; set; }
 
-        public Level(int number, int requirement, String rankName)
+        public Level(int number, int requirement, String rankName, String imageUri, String imageUrl)
         {
             this.Number = number;
             this.Requirement = requirement;
             this.RankName = rankName;
+            this.ImageUri = imageUri;
+            this.ImageUrl = imageUrl;
         }
     }
 }
