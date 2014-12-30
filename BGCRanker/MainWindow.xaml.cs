@@ -37,6 +37,14 @@ namespace BGCRanker
 
             InitializeComponent();
 
+            playerNameLabel.Content = "";
+            label1.Visibility = System.Windows.Visibility.Hidden;
+            label2.Visibility = System.Windows.Visibility.Hidden;
+            label3.Visibility = System.Windows.Visibility.Hidden;
+            victoriesLabel.Visibility = System.Windows.Visibility.Hidden;
+            levelLabel.Visibility = System.Windows.Visibility.Hidden;
+            rankLabel.Visibility = System.Windows.Visibility.Hidden;
+
             manageDirectories();
             readData(null);
         }
@@ -151,8 +159,6 @@ namespace BGCRanker
                             StreamWriter profileWriter = File.CreateText(profilesPath + "\\" + player.Name + ".txt");
                             profileWriter.WriteLine("name=" + player.Name);
                             profileWriter.WriteLine("victories=0");
-                            profileWriter.WriteLine("level=1");
-                            profileWriter.WriteLine("rank=");
                             profileWriter.Close();
                         }
                     }
@@ -214,6 +220,11 @@ namespace BGCRanker
             {
                 addLadderBtn.Content = "Edit ranking ladder";
                 addLadderBtn.FontWeight = FontWeights.Normal;
+
+                // create a ladder editor object
+                LadderEditor ladderEditor = new LadderEditor(dataPath + "\\" + selectedGame.Name + "\\" + "rankingLadder.txt");
+
+                ladderEditor.Close();
             }
             else
             {
@@ -246,6 +257,15 @@ namespace BGCRanker
                 {
                     playerNameLabel.FontSize = 16;
                     playerNameLabel.Content = playersListBox.SelectedItem.ToString();
+                    
+
+                    // show labels
+                    label1.Visibility = System.Windows.Visibility.Visible;
+                    label2.Visibility = System.Windows.Visibility.Visible;
+                    label3.Visibility = System.Windows.Visibility.Visible;
+                    victoriesLabel.Visibility = System.Windows.Visibility.Visible;
+                    levelLabel.Visibility = System.Windows.Visibility.Visible;
+                    rankLabel.Visibility = System.Windows.Visibility.Visible;
                 }
                 else
                 {
@@ -341,14 +361,22 @@ namespace BGCRanker
                 ladderWriter.WriteLine("levels=20");
                 ladderWriter.WriteLine("hasData=0");
                 ladderWriter.Close();
+
                 selectedGame.HasRankingLadder = true;
                 addLadderBtn.Content = "Edit ranking ladder";
                 addLadderBtn.FontWeight = FontWeights.Normal;
             }
 
-            // open ladder editing window
+            // create new ladder editor object
             LadderEditor ladderEditor = new LadderEditor(ladderPath);
+
+            // open ladder editing window
             ladderEditor.ShowDialog();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            
         }
     }
 }

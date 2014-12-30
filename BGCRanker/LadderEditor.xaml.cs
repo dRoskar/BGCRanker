@@ -376,7 +376,36 @@ namespace BGCRanker
             isCustom = false;
             formulaTextBox.IsEnabled = true;
         }
+
+        // outside communication
+        public int getPlayerLevel(int victories)
+        {
+            int level;
+            for (level = 0; level < levels + 1; level++)
+            {
+                if (victories >= getRequirement(level))
+                {
+                    return 0;
+                }
+            }
+
+            return -1;
+        }
+
+        public String getPlayerRank(int victories)
+        {
+            int level = getPlayerLevel(victories);
+
+            return ladder[level - 1].RankName;
+        }
+
+        public String getPlayerImage(int victories)
+        {
+            int level = getPlayerLevel(victories);
+            return ladder[level - 1].ImageUri;
+        }
     }
+
 
     public class Level
     {
