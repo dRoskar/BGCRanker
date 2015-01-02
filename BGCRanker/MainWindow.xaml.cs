@@ -44,6 +44,9 @@ namespace BGCRanker
             victoriesLabel.Visibility = System.Windows.Visibility.Hidden;
             levelLabel.Visibility = System.Windows.Visibility.Hidden;
             rankLabel.Visibility = System.Windows.Visibility.Hidden;
+            rankImage.Visibility = System.Windows.Visibility.Hidden;
+            victoriesTextBox.Visibility = System.Windows.Visibility.Hidden;
+            addVictoriesBtn.Visibility = System.Windows.Visibility.Hidden;
 
             manageDirectories();
             readData(null);
@@ -159,7 +162,34 @@ namespace BGCRanker
                             StreamWriter profileWriter = File.CreateText(profilesPath + "\\" + player.Name + ".txt");
                             profileWriter.WriteLine("name=" + player.Name);
                             profileWriter.WriteLine("victories=0");
+                            profileWriter.WriteLine("victoriesOld=0");
                             profileWriter.Close();
+
+                            player.Victories = 0;
+                            player.VictoriesOld = 0;
+                        }
+                        else
+                        {
+                            // get victory data
+                            StreamReader reader = new StreamReader(profilesPath + "\\" + player.Name + ".txt", Encoding.UTF8);
+                            String ln;
+                            while ((ln = reader.ReadLine()) != null)
+                            {
+                                if (ln.Contains("victories="))
+                                {
+                                    int victories;
+                                    int.TryParse(ln.Substring(ln.IndexOf("=") + 1), out victories);
+                                    player.Victories = victories;
+                                }
+                                else if (ln.Contains("victoriesOld="))
+                                {
+                                    int victoriesOld;
+                                    int.TryParse(ln.Substring(ln.IndexOf("=") + 1), out victoriesOld);
+                                    player.VictoriesOld = victoriesOld;
+                                }
+                            }
+
+                            reader.Close();
                         }
                     }
                 }
@@ -224,6 +254,17 @@ namespace BGCRanker
                 // create a ladder editor object
                 LadderEditor ladderEditor = new LadderEditor(dataPath + "\\" + selectedGame.Name + "\\" + "rankingLadder.txt");
 
+                // get calculate player data
+                foreach (Player player in players)
+                {
+                    if (player.Game.Equals(selectedGame.Name))
+                    {
+                        player.Level = ladderEditor.getPlayerLevel(player.Victories);
+                        player.Rank = ladderEditor.getPlayerRank(player.Victories);
+                        player.Image = ladderEditor.getPlayerImage(player.Victories);
+                    }
+                }
+
                 ladderEditor.Close();
             }
             else
@@ -255,17 +296,50 @@ namespace BGCRanker
                 //display data if the game has a ranking ladder
                 if (selectedGame.HasRankingLadder)
                 {
-                    playerNameLabel.FontSize = 16;
-                    playerNameLabel.Content = playersListBox.SelectedItem.ToString();
-                    
+                    // find selected player
+                    Player selectedPlayer = null;
+                    foreach (Player player in players)
+                    {
+                        if (player.Name == playersListBox.SelectedItem.ToString())
+                        {
+                            selectedPlayer = player;
+                        }
+                    }
 
-                    // show labels
-                    label1.Visibility = System.Windows.Visibility.Visible;
-                    label2.Visibility = System.Windows.Visibility.Visible;
-                    label3.Visibility = System.Windows.Visibility.Visible;
-                    victoriesLabel.Visibility = System.Windows.Visibility.Visible;
-                    levelLabel.Visibility = System.Windows.Visibility.Visible;
-                    rankLabel.Visibility = System.Windows.Visibility.Visible;
+                    if (selectedPlayer != null)
+                    {
+                        playerNameLabel.FontSize = 16;
+                        playerNameLabel.Content = selectedPlayer.Name;
+                        victoriesLabel.Content = selectedPlayer.Victories;
+                        levelLabel.Content = selectedPlayer.Level;
+                        rankLabel.Content = selectedPlayer.Rank;
+
+                        if (selectedPlayer.Image != null || selectedPlayer.Image != "")
+                        {
+                            BitmapImage bmi = new BitmapImage();
+                            bmi.BeginInit();
+                            String directory = dataPath + "\\" + selectedGame.Name + "\\icons\\";
+                            bmi.UriSource = new Uri(directory + selectedPlayer.Image);
+                            bmi.EndInit();
+
+                            rankImage.Source = bmi;
+                        }
+
+                        // show labels
+                        label1.Visibility = System.Windows.Visibility.Visible;
+                        label2.Visibility = System.Windows.Visibility.Visible;
+                        label3.Visibility = System.Windows.Visibility.Visible;
+                        victoriesLabel.Visibility = System.Windows.Visibility.Visible;
+                        levelLabel.Visibility = System.Windows.Visibility.Visible;
+                        rankLabel.Visibility = System.Windows.Visibility.Visible;
+                        rankImage.Visibility = System.Windows.Visibility.Visible;
+                        victoriesTextBox.Visibility = System.Windows.Visibility.Visible;
+                        addVictoriesBtn.Visibility = System.Windows.Visibility.Visible;
+                    }
+                    else
+                    {
+                        System.Windows.MessageBox.Show("Error getting player info");
+                    }
                 }
                 else
                 {
@@ -281,6 +355,15 @@ namespace BGCRanker
         private void clearFields()
         {
             playerNameLabel.Content = "";
+            label1.Visibility = System.Windows.Visibility.Hidden;
+            label2.Visibility = System.Windows.Visibility.Hidden;
+            label3.Visibility = System.Windows.Visibility.Hidden;
+            victoriesLabel.Visibility = System.Windows.Visibility.Hidden;
+            levelLabel.Visibility = System.Windows.Visibility.Hidden;
+            rankLabel.Visibility = System.Windows.Visibility.Hidden;
+            rankImage.Visibility = System.Windows.Visibility.Hidden;
+            victoriesTextBox.Visibility = System.Windows.Visibility.Hidden;
+            addVictoriesBtn.Visibility = System.Windows.Visibility.Hidden;
         }
 
         private void addNewGame()
@@ -372,11 +455,43 @@ namespace BGCRanker
 
             // open ladder editing window
             ladderEditor.ShowDialog();
+
+            // refresh lists
+            comboSelectionChanged();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             
+        }
+
+        private void rankImage_Loaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                BitmapImage img = new BitmapImage();
+                img.BeginInit();
+                string directory = System.IO.Directory.GetCurrentDirectory();
+                img.UriSource = new Uri(directory + "//images//missing.png");
+                img.EndInit();
+
+                var image = sender as Image;
+                image.Source = img;
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void addVictoriesBtn_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void undoBtn_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

@@ -11,8 +11,10 @@ namespace BGCRanker
         public String Name { get; set; }
         public String Game { get; set; }
         public int Victories { get; set; }
+        public int VictoriesOld { get; set; }
         public int Level { get; set; }
         public String Rank { get; set; }
+        public String Image { get; set; }
 
         public Player()
         {

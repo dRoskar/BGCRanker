@@ -16,9 +16,13 @@
         <Label x:Name="label2" Content="Level:" HorizontalAlignment="Left" Margin="163,115,0,0" VerticalAlignment="Top" FontSize="14"/>
         <Label x:Name="label1" Content="Victories:" HorizontalAlignment="Left" Margin="141,86,0,0" VerticalAlignment="Top" FontSize="14"/>
         <Label x:Name="label3" Content="Rank:" HorizontalAlignment="Left" Margin="164,144,0,0" VerticalAlignment="Top" FontSize="14"/>
-        <Label x:Name="victoriesLabel" Content="000" HorizontalAlignment="Left" Margin="212,86,0,0" VerticalAlignment="Top" FontSize="14"/>
-        <Label x:Name="levelLabel" Content="000" HorizontalAlignment="Left" Margin="212,115,0,0" VerticalAlignment="Top" FontSize="14"/>
-        <Label x:Name="rankLabel" Content="Rankname" HorizontalAlignment="Left" Margin="212,144,0,0" VerticalAlignment="Top" FontSize="14"/>
+        <Label x:Name="victoriesLabel" Content="000" HorizontalAlignment="Left" Margin="212,86,0,0" VerticalAlignment="Top" FontSize="14" FontWeight="Bold"/>
+        <Label x:Name="levelLabel" Content="000" HorizontalAlignment="Left" Margin="212,115,0,0" VerticalAlignment="Top" FontSize="14" FontWeight="Bold"/>
+        <Label x:Name="rankLabel" Content="Rankname" HorizontalAlignment="Left" Margin="212,144,0,0" VerticalAlignment="Top" FontSize="14" FontWeight="Bold"/>
+        <Image x:Name="rankImage" HorizontalAlignment="Left" Height="128" Margin="364,81,0,0" VerticalAlignment="Top" Width="128" Loaded="rankImage_Loaded"/>
+        <TextBox x:Name="victoriesTextBox" HorizontalAlignment="Left" Height="23" Margin="141,178,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="30" Tag=""/>
+        <Button x:Name="addVictoriesBtn" Content="Submit victories" HorizontalAlignment="Left" Margin="176,179,0,0" VerticalAlignment="Top" Width="99" Click="addVictoriesBtn_Click"/>
+        <Button x:Name="undoBtn" Content="Undo" HorizontalAlignment="Left" Margin="176,206,0,0" VerticalAlignment="Top" Width="99"/>
 
     </Grid>
 </Window>

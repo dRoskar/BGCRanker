@@ -36,6 +36,15 @@ namespace BGCRanker
             path = ladderPath;
             ladder = new ObservableCollection<Level>();
             InitializeComponent();
+
+            // get main properties
+            getProperties();
+
+            if (hasData)
+            {
+                // read the data from text file
+                readGridData();
+            }
         }
 
         private void DataGrid_Loaded(object sender, RoutedEventArgs e)
@@ -48,9 +57,6 @@ namespace BGCRanker
             ranksGrid.ColumnFromDisplayIndex(2).Width = 98;
             ranksGrid.ColumnFromDisplayIndex(3).Width = 95;
             ranksGrid.ColumnFromDisplayIndex(4).Width = 95;
-
-            // get main properties
-            getProperties();
 
             // display main properties
             showProperties();
@@ -173,9 +179,9 @@ namespace BGCRanker
             while ((line = sr.ReadLine()) != null)
             {
                 // parse data
-                if (Regex.IsMatch(line, "LVL[0-9]+\\([0-9]+\\)\\[[a-zA-Z]*\\]\\[[a-zA-Z]*\\]\\[[a-zA-Z]*\\]"))
+                if (Regex.IsMatch(line, "LVL[0-9]+\\([0-9]+\\)\\[[0-9a-zA-Z]*\\]\\[[0-9a-zA-Z.]*\\]\\[[0-9a-zA-Z.:/]*\\]"))
                 {
-                    Match match = Regex.Match(line, "LVL([0-9]+)\\(([0-9]+)\\)\\[([a-zA-Z]*)\\]\\[([a-zA-Z]*)\\]\\[([a-zA-Z]*)\\]");
+                    Match match = Regex.Match(line, "LVL([0-9]+)\\(([0-9]+)\\)\\[([0-9a-zA-Z]*)\\]\\[([0-9a-zA-Z.]*)\\]\\[([0-9a-zA-Z.:/]*)\\]");
 
                     // level number
                     int.TryParse(match.Groups[1].Value, out number);
@@ -196,10 +202,12 @@ namespace BGCRanker
                     ladder.Add(new Level(number, requirement, rankName, imageUri, imageUrl));
                 }
             }
+            sr.Close();
         }
 
         private int getRequirement(int level)
         {
+            int fullReq = 1;
             if (level == 1) { return 0; }
             if (level == 2) { return 1; }
 
@@ -207,10 +215,11 @@ namespace BGCRanker
             for (int i = 0; i < level - 2; i++)
             {
                 requirement += requirement * formula;
+                fullReq = fullReq + (int)Math.Round(requirement, 0);
             }
 
-            return (int)Math.Round(requirement, 0);
-        }
+            return fullReq;
+         }
 
         private void writeIsCustom(Boolean value)
         {
@@ -380,12 +389,19 @@ namespace BGCRanker
         // outside communication
         public int getPlayerLevel(int victories)
         {
-            int level;
-            for (level = 0; level < levels + 1; level++)
+            for (int i = 0; i < ladder.Count; i++)
             {
-                if (victories >= getRequirement(level))
+                if (!(victories >= ladder[ladder.Count - 1].Requirement))
                 {
-                    return 0;
+                    if (victories >= ladder[i].Requirement && victories < ladder[i + 1].Requirement)
+                    {
+                        return ladder[i].Number;
+                    }
+                }
+                else
+                {
+                    // over the maximum
+                    return ladder[ladder.Count - 1].Number;
                 }
             }
 
