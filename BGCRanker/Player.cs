@@ -13,8 +13,11 @@ namespace BGCRanker
         public int Victories { get; set; }
         public int VictoriesOld { get; set; }
         public int Level { get; set; }
+        public int LevelOld { get; set; }
         public String Rank { get; set; }
+        public String RankOld { get; set; }
         public String Image { get; set; }
+        public bool HasPrev { get; set; }
 
         public Player()
         {

@@ -22,7 +22,17 @@
         <Image x:Name="rankImage" HorizontalAlignment="Left" Height="128" Margin="364,81,0,0" VerticalAlignment="Top" Width="128" Loaded="rankImage_Loaded"/>
         <TextBox x:Name="victoriesTextBox" HorizontalAlignment="Left" Height="23" Margin="141,178,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="30" Tag=""/>
         <Button x:Name="addVictoriesBtn" Content="Submit victories" HorizontalAlignment="Left" Margin="176,179,0,0" VerticalAlignment="Top" Width="99" Click="addVictoriesBtn_Click"/>
-        <Button x:Name="undoBtn" Content="Undo" HorizontalAlignment="Left" Margin="176,206,0,0" VerticalAlignment="Top" Width="99"/>
+        <GroupBox x:Name="prevDataGroup" Header="Previously" Margin="141,206,19,21">
+            <Grid HorizontalAlignment="Left" Height="76" VerticalAlignment="Top" Width="393" Margin="0,0,-2,-12">
+                <Button x:Name="revertBtn" Content="Revert" Margin="0,0,10,19" Click="revertBtn_Click" HorizontalAlignment="Right" Width="61" Height="22" VerticalAlignment="Bottom"/>
+                <Label x:Name="prevVictoriesLabel" Content="Victories:" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" FontSize="10"/>
+                <Label x:Name="prevLevelLabel" Content="Level:" HorizontalAlignment="Left" Margin="25,15,0,0" FontSize="10" Height="23" VerticalAlignment="Top"/>
+                <Label x:Name="prevRankLabel" Content="Rank:" HorizontalAlignment="Left" Margin="26,30,0,0" VerticalAlignment="Top" FontSize="10"/>
+                <Label x:Name="prevVictories" Content="000" HorizontalAlignment="Left" Margin="60,0,0,0" VerticalAlignment="Top" FontSize="10" Padding="5"/>
+                <Label x:Name="prevLevel" Content="000" HorizontalAlignment="Left" Margin="60,15,0,0" VerticalAlignment="Top" FontSize="10"/>
+                <Label x:Name="prevRank" Content="Rankname" HorizontalAlignment="Left" Margin="60,30,0,0" VerticalAlignment="Top" FontSize="10"/>
+            </Grid>
+        </GroupBox>
 
     </Grid>
 </Window>

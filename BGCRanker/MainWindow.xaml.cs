@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
 
 namespace BGCRanker
 {
@@ -28,6 +29,8 @@ namespace BGCRanker
         private List<String> gameNames;
         private List<Player> players;
         private Game selectedGame;
+        private Player selectedPlayer;
+        private BitmapImage missingPng;
 
         public MainWindow()
         {
@@ -38,15 +41,7 @@ namespace BGCRanker
             InitializeComponent();
 
             playerNameLabel.Content = "";
-            label1.Visibility = System.Windows.Visibility.Hidden;
-            label2.Visibility = System.Windows.Visibility.Hidden;
-            label3.Visibility = System.Windows.Visibility.Hidden;
-            victoriesLabel.Visibility = System.Windows.Visibility.Hidden;
-            levelLabel.Visibility = System.Windows.Visibility.Hidden;
-            rankLabel.Visibility = System.Windows.Visibility.Hidden;
-            rankImage.Visibility = System.Windows.Visibility.Hidden;
-            victoriesTextBox.Visibility = System.Windows.Visibility.Hidden;
-            addVictoriesBtn.Visibility = System.Windows.Visibility.Hidden;
+            hideLabels();
 
             manageDirectories();
             readData(null);
@@ -140,16 +135,16 @@ namespace BGCRanker
             // get players
             foreach(Game game in games){
                 // make player profiles folder
-                String profilesPath = dataPath + "\\" + game.Name + @"\profiles";
+                String profilesPath = dataPath + "\\" + game.Name + "\\profiles";
                 if (!Directory.Exists(profilesPath))
                 {
                     Directory.CreateDirectory(profilesPath);
                 }
 
                 // read player list from game folder
-                if (File.Exists(dataPath + "\\" + game.Name + @"\players.txt"))
+                if (File.Exists(dataPath + "\\" + game.Name + "\\players.txt"))
                 {
-                    String[] lines = System.IO.File.ReadAllLines(dataPath + "\\" + game.Name + @"\players.txt", Encoding.UTF8);
+                    String[] lines = System.IO.File.ReadAllLines(dataPath + "\\" + game.Name + "\\players.txt", Encoding.UTF8);
 
                     foreach (String line in lines)
                     {
@@ -160,9 +155,9 @@ namespace BGCRanker
                         if (!File.Exists(profilesPath + "\\" + player.Name + ".txt"))
                         {
                             StreamWriter profileWriter = File.CreateText(profilesPath + "\\" + player.Name + ".txt");
-                            profileWriter.WriteLine("name=" + player.Name);
                             profileWriter.WriteLine("victories=0");
                             profileWriter.WriteLine("victoriesOld=0");
+                            profileWriter.WriteLine("hasPrev=0");
                             profileWriter.Close();
 
                             player.Victories = 0;
@@ -186,6 +181,10 @@ namespace BGCRanker
                                     int victoriesOld;
                                     int.TryParse(ln.Substring(ln.IndexOf("=") + 1), out victoriesOld);
                                     player.VictoriesOld = victoriesOld;
+                                }
+                                else if (ln.Contains("hasPrev="))
+                                {
+                                    player.HasPrev = ln.Substring(ln.IndexOf("=") + 1) == "1" ? true : false;
                                 }
                             }
 
@@ -232,10 +231,10 @@ namespace BGCRanker
 
         private void gamesComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            comboSelectionChanged();
+            comboSelectionChanged(null);
         }
 
-        public void comboSelectionChanged()
+        public void comboSelectionChanged(String selectPlayer)
         {
             // find selected game in game list
             foreach (Game game in games)
@@ -262,6 +261,8 @@ namespace BGCRanker
                         player.Level = ladderEditor.getPlayerLevel(player.Victories);
                         player.Rank = ladderEditor.getPlayerRank(player.Victories);
                         player.Image = ladderEditor.getPlayerImage(player.Victories);
+                        player.LevelOld = ladderEditor.getPlayerLevel(player.VictoriesOld);
+                        player.RankOld = ladderEditor.getPlayerRank(player.VictoriesOld);
                     }
                 }
 
@@ -287,6 +288,13 @@ namespace BGCRanker
             }
 
             playersListBox.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("", System.ComponentModel.ListSortDirection.Ascending));
+
+            // select a previously selected player
+            if (selectPlayer != "" && selectPlayer != null)
+            {
+                // get players index
+                playersListBox.SelectedIndex = playersListBox.Items.IndexOf(selectPlayer);
+            }
         }
 
         private void playersListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -297,7 +305,7 @@ namespace BGCRanker
                 if (selectedGame.HasRankingLadder)
                 {
                     // find selected player
-                    Player selectedPlayer = null;
+                    selectedPlayer = null;
                     foreach (Player player in players)
                     {
                         if (player.Name == playersListBox.SelectedItem.ToString())
@@ -314,27 +322,47 @@ namespace BGCRanker
                         levelLabel.Content = selectedPlayer.Level;
                         rankLabel.Content = selectedPlayer.Rank;
 
-                        if (selectedPlayer.Image != null || selectedPlayer.Image != "")
+                        // previous data
+                        prevVictories.Content = selectedPlayer.VictoriesOld;
+                        prevLevel.Content = selectedPlayer.LevelOld;
+                        prevRank.Content = selectedPlayer.RankOld;
+
+                        if (selectedPlayer.Image != null && selectedPlayer.Image != "")
                         {
                             BitmapImage bmi = new BitmapImage();
                             bmi.BeginInit();
                             String directory = dataPath + "\\" + selectedGame.Name + "\\icons\\";
-                            bmi.UriSource = new Uri(directory + selectedPlayer.Image);
-                            bmi.EndInit();
 
-                            rankImage.Source = bmi;
+                            //check if image exists
+                            if (File.Exists(directory + selectedPlayer.Image))
+                            {
+                                bmi.UriSource = new Uri(directory + selectedPlayer.Image);
+                                bmi.EndInit();
+
+                                rankImage.Source = bmi;
+                            }
+                            else
+                            {
+                                rankImage.Source = missingPng;
+                            }
+                        }
+                        else
+                        {
+                            rankImage.Source = missingPng;
                         }
 
                         // show labels
-                        label1.Visibility = System.Windows.Visibility.Visible;
-                        label2.Visibility = System.Windows.Visibility.Visible;
-                        label3.Visibility = System.Windows.Visibility.Visible;
-                        victoriesLabel.Visibility = System.Windows.Visibility.Visible;
-                        levelLabel.Visibility = System.Windows.Visibility.Visible;
-                        rankLabel.Visibility = System.Windows.Visibility.Visible;
-                        rankImage.Visibility = System.Windows.Visibility.Visible;
-                        victoriesTextBox.Visibility = System.Windows.Visibility.Visible;
-                        addVictoriesBtn.Visibility = System.Windows.Visibility.Visible;
+                        showLabels();
+
+                        // show previous data
+                        if (selectedPlayer.HasPrev)
+                        {
+                            prevDataGroup.Visibility = System.Windows.Visibility.Visible;
+                        }
+                        else
+                        {
+                            prevDataGroup.Visibility = System.Windows.Visibility.Hidden;
+                        }
                     }
                     else
                     {
@@ -347,14 +375,14 @@ namespace BGCRanker
                     playerNameLabel.Content = "This game does not have a ranking ladder yet.";
                 }
             }
-            else{
+            else
+            {
                 clearFields();
             }
         }
 
-        private void clearFields()
+        private void hideLabels()
         {
-            playerNameLabel.Content = "";
             label1.Visibility = System.Windows.Visibility.Hidden;
             label2.Visibility = System.Windows.Visibility.Hidden;
             label3.Visibility = System.Windows.Visibility.Hidden;
@@ -364,6 +392,26 @@ namespace BGCRanker
             rankImage.Visibility = System.Windows.Visibility.Hidden;
             victoriesTextBox.Visibility = System.Windows.Visibility.Hidden;
             addVictoriesBtn.Visibility = System.Windows.Visibility.Hidden;
+            prevDataGroup.Visibility = System.Windows.Visibility.Hidden;
+        }
+
+        private void showLabels()
+        {
+            label1.Visibility = System.Windows.Visibility.Visible;
+            label2.Visibility = System.Windows.Visibility.Visible;
+            label3.Visibility = System.Windows.Visibility.Visible;
+            victoriesLabel.Visibility = System.Windows.Visibility.Visible;
+            levelLabel.Visibility = System.Windows.Visibility.Visible;
+            rankLabel.Visibility = System.Windows.Visibility.Visible;
+            rankImage.Visibility = System.Windows.Visibility.Visible;
+            victoriesTextBox.Visibility = System.Windows.Visibility.Visible;
+            addVictoriesBtn.Visibility = System.Windows.Visibility.Visible;
+        }
+
+        private void clearFields()
+        {
+            playerNameLabel.Content = "";
+            hideLabels();
         }
 
         private void addNewGame()
@@ -426,7 +474,7 @@ namespace BGCRanker
                     readData(null);
 
                     // refresh lists
-                    comboSelectionChanged();
+                    comboSelectionChanged(playerName);
                 }
             }
         }
@@ -457,7 +505,7 @@ namespace BGCRanker
             ladderEditor.ShowDialog();
 
             // refresh lists
-            comboSelectionChanged();
+            comboSelectionChanged(null);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -469,14 +517,13 @@ namespace BGCRanker
         {
             try
             {
-                BitmapImage img = new BitmapImage();
-                img.BeginInit();
+                missingPng = new BitmapImage();
+                missingPng.BeginInit();
                 string directory = System.IO.Directory.GetCurrentDirectory();
-                img.UriSource = new Uri(directory + "//images//missing.png");
-                img.EndInit();
+                missingPng.UriSource = new Uri(directory + "//images//missing.png");
+                missingPng.EndInit();
 
-                var image = sender as Image;
-                image.Source = img;
+                rankImage.Source = missingPng;
             }
             catch (Exception ex)
             {
@@ -486,12 +533,59 @@ namespace BGCRanker
 
         private void addVictoriesBtn_Click(object sender, RoutedEventArgs e)
         {
-            
+            // validate victories field
+            int victories;
+            if(int.TryParse(victoriesTextBox.Text, out victories)){
+                selectedPlayer.VictoriesOld = selectedPlayer.Victories;
+                selectedPlayer.Victories = selectedPlayer.Victories + victories;
+                selectedPlayer.HasPrev = true;
+                victoriesTextBox.Text = "";
+
+                // write new data to file
+                String filePath = dataPath + "\\" + selectedGame.Name + "\\profiles" + "\\" + selectedPlayer.Name + ".txt";
+
+                // overwrite victories
+                File.WriteAllText(filePath, Regex.Replace(File.ReadAllText(filePath, Encoding.UTF8), "victories=[0-9]+", "victories=" + selectedPlayer.Victories));
+
+                // overwrite previous victories
+                File.WriteAllText(filePath, Regex.Replace(File.ReadAllText(filePath, Encoding.UTF8), "victoriesOld=[0-9]+", "victoriesOld=" + selectedPlayer.VictoriesOld));
+
+                // overwrite hasPrev
+                File.WriteAllText(filePath, Regex.Replace(File.ReadAllText(filePath, Encoding.UTF8), "hasPrev=[01]", "hasPrev=1"));
+
+                // refresh display
+                comboSelectionChanged(selectedPlayer.Name);
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("Please enter an integer");
+                victoriesTextBox.Text = "";
+            }
         }
 
-        private void undoBtn_Click(object sender, RoutedEventArgs e)
+        private void revertBtn_Click(object sender, RoutedEventArgs e)
         {
+            if (selectedPlayer.HasPrev)
+            {
+                selectedPlayer.Victories = selectedPlayer.VictoriesOld;
+                selectedPlayer.VictoriesOld = 0;
+                selectedPlayer.HasPrev = false;
 
+                // write new data to file
+                String filePath = dataPath + "\\" + selectedGame.Name + "\\profiles" + "\\" + selectedPlayer.Name + ".txt";
+
+                // overwrite victories
+                File.WriteAllText(filePath, Regex.Replace(File.ReadAllText(filePath, Encoding.UTF8), "victories=[0-9]+", "victories=" + selectedPlayer.Victories));
+
+                // overwrite previous victories
+                File.WriteAllText(filePath, Regex.Replace(File.ReadAllText(filePath, Encoding.UTF8), "victoriesOld=[0-9]+", "victoriesOld=" + selectedPlayer.VictoriesOld));
+
+                // overwrite hasPrev
+                File.WriteAllText(filePath, Regex.Replace(File.ReadAllText(filePath, Encoding.UTF8), "hasPrev=[01]", "hasPrev=0"));
+
+                // refresh display
+                comboSelectionChanged(selectedPlayer.Name);
+            }
         }
     }
 }

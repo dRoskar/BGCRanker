@@ -179,9 +179,9 @@ namespace BGCRanker
             while ((line = sr.ReadLine()) != null)
             {
                 // parse data
-                if (Regex.IsMatch(line, "LVL[0-9]+\\([0-9]+\\)\\[[0-9a-zA-Z]*\\]\\[[0-9a-zA-Z.]*\\]\\[[0-9a-zA-Z.:/]*\\]"))
+                if (Regex.IsMatch(line, "LVL[0-9]+\\([0-9]+\\)\\[[0-9a-zA-Z -]*\\]\\[[0-9a-zA-Z._+ -]*\\]\\[[0-9a-zA-Z.:/ -+]*\\]"))
                 {
-                    Match match = Regex.Match(line, "LVL([0-9]+)\\(([0-9]+)\\)\\[([0-9a-zA-Z]*)\\]\\[([0-9a-zA-Z.]*)\\]\\[([0-9a-zA-Z.:/]*)\\]");
+                    Match match = Regex.Match(line, "LVL([0-9]+)\\(([0-9]+)\\)\\[([0-9a-zA-Z -]*)\\]\\[([0-9a-zA-Z._+ -]*)\\]\\[([0-9a-zA-Z.:/ -+]*)\\]");
 
                     // level number
                     int.TryParse(match.Groups[1].Value, out number);
