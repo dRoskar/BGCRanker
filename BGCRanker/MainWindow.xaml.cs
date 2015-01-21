@@ -524,7 +524,7 @@ namespace BGCRanker
                 missingPng = new BitmapImage();
                 missingPng.BeginInit();
                 string directory = System.IO.Directory.GetCurrentDirectory();
-                missingPng.UriSource = new Uri(directory + "//images//missing.png");
+                missingPng.UriSource = new Uri(directory + "\\images\\missing.png");
                 missingPng.EndInit();
 
                 rankImage.Source = missingPng;

@@ -5,7 +5,7 @@
     <Grid>
         <Button x:Name="cancelBtn" Content="Cancel" Margin="0,0,10,10" Click="cancelBtn_Click" HorizontalAlignment="Right" Width="75" Height="22" VerticalAlignment="Bottom"/>
         <Button x:Name="saveBtn" Content="Save" Margin="0,0,90,10" Click="saveBtn_Click" Height="22" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75"/>
-        <DataGrid x:Name="ranksGrid" Margin="10,0,10,37" Height="350" VerticalAlignment="Bottom" Loaded="DataGrid_Loaded"/>
+        <DataGrid x:Name="ranksGrid" Margin="10,0,10,37" Height="350" VerticalAlignment="Bottom" Loaded="DataGrid_Loaded" BeginningEdit="ranksGrid_BeginningEdit"/>
         <Button x:Name="refreshBtn" Content="Refresh" HorizontalAlignment="Right" Margin="0,0,170,10" Width="75" Height="22" VerticalAlignment="Bottom" Click="refreshBtn_Click"/>
         <Label Content="Number of levels:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="103"/>
         <TextBox x:Name="levelsTextBox" HorizontalAlignment="Left" Height="23" Margin="118,13,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="60" KeyDown="levelsTextBox_KeyDown"/>

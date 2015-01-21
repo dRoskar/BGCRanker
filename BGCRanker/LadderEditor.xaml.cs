@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using System.IO;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using System.Windows.Controls.Primitives;
 
 namespace BGCRanker
 {
@@ -23,7 +24,6 @@ namespace BGCRanker
     /// </summary>
     public partial class LadderEditor : Window
     {
-
         private String path;
         private int levels;
         private float formula;
@@ -254,6 +254,7 @@ namespace BGCRanker
                 writeIsCustom(isCustom);
                 writeFormula(formula);
                 writeLevels(levels);
+                writeHasData(hasData);
 
                 // erase old level data from file
                 eraseGridDataFromFile();
@@ -420,6 +421,59 @@ namespace BGCRanker
             int level = getPlayerLevel(victories);
             return ladder[level - 1].ImageUri;
         }
+
+        private void ranksGrid_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
+        {
+            if (e.Column.Header.ToString().Equals("ImageUri"))
+            {
+                e.Cancel = true;
+
+                // show dialog for image selection
+                Microsoft.Win32.OpenFileDialog ofd = new Microsoft.Win32.OpenFileDialog();
+
+                // set file dialog filters
+                ofd.Filter = "Image files|*.jpeg;*.png;*.jpg";
+
+                // display open file dialog
+                Nullable<bool> result = ofd.ShowDialog();
+
+                // get file name
+                if (result == true)
+                {
+                    String originalFilePath = ofd.FileName;
+
+                    // trim the file name
+                    String fileName = originalFilePath.Substring(originalFilePath.LastIndexOf("\\") + 1);
+                    String newPath = path.Substring(0, path.LastIndexOf("\\") + 1) + "icons";
+
+                    // check id icon directory exists
+                    if (!Directory.Exists(newPath))
+                    {
+                        // create icons directory
+                        Directory.CreateDirectory(newPath);
+                    }
+
+                    // copy file to data directory
+                    newPath = newPath + "\\" + fileName;
+                    try
+                    {
+                        File.Copy(originalFilePath, newPath);
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        MessageBox.Show("Unable to use the file; Restricted access!");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+
+                    // record file name to data grid
+                    ExtensionMethods.GetCell(ranksGrid, e.Row, e.Column.DisplayIndex).Content = fileName;
+                    ladder.ElementAt(e.Row.GetIndex()).ImageUri = fileName;
+                }
+            }
+        }
     }
 
 
@@ -438,6 +492,64 @@ namespace BGCRanker
             this.RankName = rankName;
             this.ImageUri = imageUri;
             this.ImageUrl = imageUrl;
+        }
+    }
+
+    public static class ExtensionMethods
+    {
+        public static T GetVisualChild<T>(Visual parent) where T : Visual
+        {
+            T child = default(T);
+            int numVisuals = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < numVisuals; i++)
+            {
+                Visual v = (Visual)VisualTreeHelper.GetChild(parent, i);
+                child = v as T;
+                if (child == null)
+                {
+                    child = GetVisualChild<T>(v);
+                }
+                if (child != null)
+                {
+                    break;
+                }
+            }
+            return child;
+        }
+
+        public static DataGridRow GetSelectedRow(this DataGrid grid)
+        {
+            return (DataGridRow)grid.ItemContainerGenerator.ContainerFromItem(grid.SelectedItem);
+        }
+        public static DataGridRow GetRow(this DataGrid grid, int index)
+        {
+            DataGridRow row = (DataGridRow)grid.ItemContainerGenerator.ContainerFromIndex(index);
+            if (row == null)
+            {
+                // May be virtualized, bring into view and try again.
+                grid.UpdateLayout();
+                grid.ScrollIntoView(grid.Items[index]);
+                row = (DataGridRow)grid.ItemContainerGenerator.ContainerFromIndex(index);
+            }
+            return row;
+        }
+
+        public static DataGridCell GetCell(this DataGrid grid, DataGridRow row, int column)
+        {
+            if (row != null)
+            {
+                DataGridCellsPresenter presenter = GetVisualChild<DataGridCellsPresenter>(row);
+
+                if (presenter == null)
+                {
+                    grid.ScrollIntoView(row, grid.Columns[column]);
+                    presenter = GetVisualChild<DataGridCellsPresenter>(row);
+                }
+
+                DataGridCell cell = (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(column);
+                return cell;
+            }
+            return null;
         }
     }
 }
