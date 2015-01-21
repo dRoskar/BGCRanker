@@ -121,6 +121,7 @@ namespace BGCRanker
             // reset collected data
             games.Clear();
             players.Clear();
+            gameNames.Clear();
 
             // get games
             String[] gameDirectories = Directory.GetDirectories(dataPath);
@@ -162,6 +163,7 @@ namespace BGCRanker
 
                             player.Victories = 0;
                             player.VictoriesOld = 0;
+                            player.HasPrev = false;
                         }
                         else
                         {
@@ -242,6 +244,7 @@ namespace BGCRanker
                 if (game.Name == (String) gamesComboBox.SelectedItem)
                 {
                     selectedGame = game;
+                    break;
                 }
             }
 
@@ -308,9 +311,10 @@ namespace BGCRanker
                     selectedPlayer = null;
                     foreach (Player player in players)
                     {
-                        if (player.Name == playersListBox.SelectedItem.ToString())
+                        if (player.Name == playersListBox.SelectedItem.ToString() && player.Game == selectedGame.Name)
                         {
                             selectedPlayer = player;
+                            break;
                         }
                     }
 
