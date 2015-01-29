@@ -28,8 +28,8 @@ Features
 
  - Add multiple games to your games list     [X]
  - Add multiple players for each game        [X]
- - Construct a ranking ladder for each game  [ ]
- - Player info display                       [ ]
- - Submit new victories for players          [ ]
- - Rank image display                        [ ]
+ - Construct a ranking ladder for each game  [X]
+ - Player info display                       [X]
+ - Submit new victories for players          [X]
+ - Rank image display                        [X]
  - Generate level up message                 [ ]
